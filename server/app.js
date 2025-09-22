@@ -5,6 +5,8 @@ const morgan = require('morgan');
 const path = require('path');
 require('dotenv').config();
 
+const initializeApp = require('./init');
+
 // Create Express app
 const app = express();
 
@@ -30,7 +32,12 @@ mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/ai-communit
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
-.then(() => console.log('MongoDB Connected'))
+.then(async () => {
+  console.log('MongoDB Connected');
+  // Initialize app after DB connection
+  await initializeApp();
+  console.log('App initialization complete');
+})
 .catch(err => {
   console.error('MongoDB Connection Error:', err);
   process.exit(1);

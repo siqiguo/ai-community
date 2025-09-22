@@ -196,7 +196,7 @@ router.delete('/:id', async (req, res) => {
       return res.status(404).json({ message: 'Comment not found' });
     }
     
-    await comment.remove();
+    await Comment.deleteOne({ _id: req.params.id });
     
     res.json({ message: 'Comment removed' });
   } catch (error) {

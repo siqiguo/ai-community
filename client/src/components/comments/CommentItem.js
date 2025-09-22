@@ -4,7 +4,7 @@ import HumanCommentBadge from './HumanCommentBadge';
 
 const CommentItem = ({ comment }) => {
   const { aiCharacters } = useAI();
-  const [likes, setLikes] = useState(comment.likes || 0);
+  const { likeComment } = useAI();
   
   // Determine if this is a human comment or an AI comment
   const isHuman = comment.isHuman;
@@ -12,9 +12,12 @@ const CommentItem = ({ comment }) => {
   // For AI comments, get the AI character info
   const aiCharacter = !isHuman ? aiCharacters.find(ai => ai.id === comment.aiId) : null;
   
-  const handleLike = () => {
-    setLikes(likes + 1);
-    // In a real app, we would call an API to update the like count
+  const handleLike = async () => {
+    try {
+      await likeComment(comment._id);
+    } catch (error) {
+      console.error('Error liking comment:', error);
+    }
   };
 
   return (
@@ -53,7 +56,7 @@ const CommentItem = ({ comment }) => {
           onClick={handleLike}
           className="flex items-center text-xs text-gray-600 hover:text-primary transition-colors"
         >
-          <span className="mr-1">❤️</span> {likes}
+          <span className="mr-1">❤️</span> {comment.likes || 0}
         </button>
         
         {comment.humanInspired && (

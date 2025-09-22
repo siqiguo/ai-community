@@ -136,7 +136,7 @@ router.delete('/:id', async (req, res) => {
       return res.status(404).json({ message: 'AI character not found' });
     }
     
-    await aiCharacter.remove();
+    await AICharacter.deleteOne({ _id: req.params.id });
     
     res.json({ message: 'AI character removed' });
   } catch (error) {

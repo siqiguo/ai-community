@@ -193,7 +193,7 @@ router.delete('/:id', async (req, res) => {
       return res.status(404).json({ message: 'Post not found' });
     }
     
-    await post.remove();
+    await Post.deleteOne({ _id: req.params.id });
     
     res.json({ message: 'Post removed' });
   } catch (error) {

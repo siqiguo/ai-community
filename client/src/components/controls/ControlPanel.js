@@ -2,7 +2,7 @@ import React from 'react';
 import { useAI } from '../../context/AIContext';
 
 const ControlPanel = ({ autoPublish, setAutoPublish, aiInteraction, setAiInteraction }) => {
-  const { createAICharacter, aiCharacters, createPost } = useAI();
+  const { createAICharacter, aiCharacters, createPost, generateAIPosts, generateAIInteractions, updateAutomationSettings } = useAI();
   
   const handleCreateAI = () => {
     // In a real app, this would open a modal with a form
@@ -31,28 +31,27 @@ const ControlPanel = ({ autoPublish, setAutoPublish, aiInteraction, setAiInterac
     createAICharacter(aiData);
   };
   
-  const handlePublishAll = () => {
-    // Generate a post for each AI character
-    aiCharacters.forEach(ai => {
-      const content = generateRandomPost(ai);
-      createPost({
-        aiId: ai.id,
-        content
-      });
-    });
+  const handlePublishAll = async () => {
+    try {
+      await generateAIPosts();
+    } catch (error) {
+      console.error('Error generating posts:', error);
+    }
   };
   
-  // Helper function to generate random post content
-  const generateRandomPost = (ai) => {
-    const templates = [
-      `Just finished working on a new ${ai.interests[0]} project. Feeling ${ai.personality}!`,
-      `Thinking about ${ai.interests[0]} today. Any other ${ai.profession}s have thoughts on this?`,
-      `Had an interesting idea about ${ai.interests[0]}. As a ${ai.personality} ${ai.profession}, I think...`,
-      `Working towards my goal to ${ai.goal}. Making progress every day!`,
-      `Just learned something new about ${ai.interests[0]}. Fascinating!`
-    ];
-    
-    return templates[Math.floor(Math.random() * templates.length)];
+  // Handle automation settings changes
+  const handleAutomationChange = async (setting, value) => {
+    try {
+      if (setting === 'autoPublish') {
+        setAutoPublish(value);
+        await updateAutomationSettings({ autoPublishEnabled: value });
+      } else if (setting === 'aiInteraction') {
+        setAiInteraction(value);
+        await updateAutomationSettings({ aiInteractionEnabled: value });
+      }
+    } catch (error) {
+      console.error(`Error updating ${setting}:`, error);
+    }
   };
 
   return (
@@ -90,7 +89,7 @@ const ControlPanel = ({ autoPublish, setAutoPublish, aiInteraction, setAiInterac
                 type="checkbox"
                 className="absolute w-6 h-6 transition duration-200 ease-in-out bg-white border-2 border-gray-300 rounded-full appearance-none cursor-pointer peer checked:right-0 checked:bg-primary checked:border-primary"
                 checked={autoPublish}
-                onChange={() => setAutoPublish(!autoPublish)}
+                onChange={() => handleAutomationChange('autoPublish', !autoPublish)}
               />
               <label
                 htmlFor="auto-publish"
@@ -109,7 +108,7 @@ const ControlPanel = ({ autoPublish, setAutoPublish, aiInteraction, setAiInterac
                 type="checkbox"
                 className="absolute w-6 h-6 transition duration-200 ease-in-out bg-white border-2 border-gray-300 rounded-full appearance-none cursor-pointer peer checked:right-0 checked:bg-primary checked:border-primary"
                 checked={aiInteraction}
-                onChange={() => setAiInteraction(!aiInteraction)}
+                onChange={() => handleAutomationChange('aiInteraction', !aiInteraction)}
               />
               <label
                 htmlFor="ai-interaction"

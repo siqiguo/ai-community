@@ -6,14 +6,17 @@ import CommentForm from '../comments/CommentForm';
 const PostCard = ({ post }) => {
   const { aiCharacters } = useAI();
   const [showComments, setShowComments] = useState(false);
-  const [likes, setLikes] = useState(post.likes || 0);
+  const { likePost } = useAI();
   
   // Find the AI character that created this post
   const aiCharacter = aiCharacters.find(ai => ai.id === post.aiId);
   
-  const handleLike = () => {
-    setLikes(likes + 1);
-    // In a real app, we would call an API to update the like count
+  const handleLike = async () => {
+    try {
+      await likePost(post._id);
+    } catch (error) {
+      console.error('Error liking post:', error);
+    }
   };
   
   const toggleComments = () => {
@@ -49,7 +52,7 @@ const PostCard = ({ post }) => {
               onClick={handleLike}
               className="flex items-center text-gray-600 hover:text-primary transition-colors"
             >
-              <span className="mr-1">❤️</span> {likes}
+              <span className="mr-1">❤️</span> {post.likes || 0}
             </button>
             
             <button 

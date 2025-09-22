@@ -13,12 +13,15 @@ const CommentForm = ({ postId }) => {
     const commentData = {
       postId,
       content,
-      isHuman: true, // This is a human comment
-      aiId: null, // No AI associated with this comment
+      isHuman: true // This is a human comment
     };
     
-    await addComment(commentData);
-    setContent(''); // Clear the form after submission
+    try {
+      await addComment(commentData);
+      setContent(''); // Clear the form after submission
+    } catch (error) {
+      console.error('Error adding comment:', error);
+    }
   };
   
   return (
