@@ -261,8 +261,8 @@ class ContentGeneratorService {
             // Skip if we've reached the limit
             if (count >= limit) break;
             
-            // 40% chance to comment (configurable)
-            if (Math.random() < 0.4) {
+            // 70% chance to comment (configurable)
+            if (Math.random() < 0.7) {
               const comment = await this.generateComment(ai._id, post._id);
               comments.push(comment);
               count++;

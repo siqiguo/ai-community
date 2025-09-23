@@ -3,19 +3,19 @@ const mongoose = require('mongoose');
 const AutomationSettingSchema = new mongoose.Schema({
   autoPublishEnabled: {
     type: Boolean,
-    default: false
+    default: true
   },
   aiInteractionEnabled: {
     type: Boolean,
-    default: false
+    default: true
   },
   publishInterval: {
     type: Number,
-    default: 3600000 // Default to 1 hour in milliseconds
+    default: 180000 // Default to 3 minutes in milliseconds
   },
   interactionProbability: {
     type: Number,
-    default: 0.4 // 40% chance for AI to interact with a post
+    default: 0.5 // 50% chance for AI to interact with a post
   },
   humanInteractionProbability: {
     type: Number,
@@ -23,7 +23,7 @@ const AutomationSettingSchema = new mongoose.Schema({
   },
   maxPostsPerInterval: {
     type: Number,
-    default: 5
+    default: 10
   },
   maxCommentsPerInterval: {
     type: Number,

@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { AutomationSetting } = require('../models');
+const automationService = require('../services/automation');
 
 /**
  * @route   GET /api/automation/settings
@@ -61,9 +62,40 @@ router.put('/settings', async (req, res) => {
     
     await settings.save();
     
+    // Update automation service settings
+    await automationService.updateSettings(settings);
+    
     res.json(settings);
   } catch (error) {
     console.error('Error updating automation settings:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+/**
+ * @route   POST /api/automation/reset-settings
+ * @desc    Reset automation settings to defaults
+ * @access  Public
+ */
+router.post('/reset-settings', async (req, res) => {
+  try {
+    // Delete any existing settings
+    await AutomationSetting.deleteMany({});
+    
+    // Create new default settings
+    const newSettings = new AutomationSetting();
+    await newSettings.save();
+    
+    // Update automation service with new settings
+    await automationService.updateSettings(newSettings);
+    
+    res.json({ 
+      success: true, 
+      message: 'Automation settings reset to defaults',
+      settings: newSettings 
+    });
+  } catch (error) {
+    console.error('Error resetting automation settings:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -81,11 +113,13 @@ router.post('/trigger', async (req, res) => {
       return res.status(400).json({ message: 'Valid action required' });
     }
     
-    // This would normally trigger background jobs
-    // For now, just return success message
+    // Trigger the appropriate action
+    const result = await automationService.triggerContentGeneration(action);
+    
     res.json({ 
       success: true,
       message: `Triggered automation: ${action}`,
+      result,
       timestamp: new Date().toISOString()
     });
     

@@ -2,7 +2,7 @@ import React from 'react';
 import { useAI } from '../../context/AIContext';
 
 const ControlPanel = ({ autoPublish, setAutoPublish, aiInteraction, setAiInteraction }) => {
-  const { createAICharacter, aiCharacters, createPost, generateAIPosts, generateAIInteractions, updateAutomationSettings } = useAI();
+  const { createAICharacter, aiCharacters, createPost, generateAIPosts, generateAIInteractions, updateAutomationSettings, resetAutomationSettings } = useAI();
   
   const handleCreateAI = () => {
     // In a real app, this would open a modal with a form
@@ -36,6 +36,17 @@ const ControlPanel = ({ autoPublish, setAutoPublish, aiInteraction, setAiInterac
       await generateAIPosts();
     } catch (error) {
       console.error('Error generating posts:', error);
+    }
+  };
+  
+  const handleResetSettings = async () => {
+    try {
+      await resetAutomationSettings();
+      setAutoPublish(true);
+      setAiInteraction(true);
+      alert('Settings have been reset to defaults');
+    } catch (error) {
+      console.error('Error resetting settings:', error);
     }
   };
   
@@ -115,6 +126,15 @@ const ControlPanel = ({ autoPublish, setAutoPublish, aiInteraction, setAiInterac
                 className="block w-full h-full bg-gray-300 rounded-full peer-checked:bg-primary-light cursor-pointer"
               ></label>
             </div>
+          </div>
+          
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <button 
+              onClick={handleResetSettings}
+              className="w-full btn bg-gray-200 text-gray-700 hover:bg-gray-300 text-sm"
+            >
+              Reset to Default Settings
+            </button>
           </div>
         </div>
       </div>

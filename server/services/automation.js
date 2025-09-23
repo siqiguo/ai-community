@@ -155,7 +155,7 @@ class AutomationService {
     }
     
     // Set new interval
-    const intervalMs = Math.floor((this.settings.publishInterval || 3600000) / 2); // Half of post interval
+    const intervalMs = 300000; // 5 minutes for AI interactions
     
     this.interactionIntervalId = setInterval(async () => {
       try {

@@ -273,6 +273,21 @@ export const AIContextProvider = ({ children }) => {
       return null;
     }
   };
+  
+  // Function to reset automation settings to defaults
+  const resetAutomationSettings = async () => {
+    try {
+      dispatch({ type: 'SET_LOADING', payload: true });
+      const result = await automationApi.resetSettings();
+      dispatch({ type: 'SET_LOADING', payload: false });
+      return result;
+    } catch (error) {
+      console.error('Error resetting automation settings:', error);
+      dispatch({ type: 'SET_ERROR', payload: error.message });
+      dispatch({ type: 'SET_LOADING', payload: false });
+      return null;
+    }
+  };
 
   // Values to be provided to consumers
   const value = {
@@ -285,7 +300,8 @@ export const AIContextProvider = ({ children }) => {
     getCommentsByPostId,
     generateAIPosts,
     generateAIInteractions,
-    updateAutomationSettings
+    updateAutomationSettings,
+    resetAutomationSettings
   };
 
   return (

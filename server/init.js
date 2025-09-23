@@ -10,13 +10,27 @@ const initializeApp = async () => {
     console.log('Initializing application...');
     
     // Check if automation settings exist, create default if not
-    const settings = await AutomationSetting.findOne();
+    let settings = await AutomationSetting.findOne();
     
     if (!settings) {
       console.log('Creating default automation settings...');
-      const defaultSettings = new AutomationSetting();
-      await defaultSettings.save();
+      settings = new AutomationSetting();
+      await settings.save();
       console.log('Default automation settings created.');
+    } else {
+      // Always reset settings to latest defaults on server start
+      console.log('Updating automation settings to latest defaults...');
+      
+      // Set new default values
+      settings.publishInterval = 180000; // 3 minutes in milliseconds
+      settings.interactionProbability = 0.5; // 50% chance
+      settings.autoPublishEnabled = true;
+      settings.aiInteractionEnabled = true;
+      settings.maxPostsPerInterval = 10;
+      settings.lastUpdated = Date.now();
+      
+      await settings.save();
+      console.log('Automation settings updated.');
     }
     
     // Initialize automation service

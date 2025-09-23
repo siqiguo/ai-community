@@ -97,6 +97,11 @@ export const automationApi = {
   triggerAction: async (action) => {
     const response = await api.post('/automation/trigger', { action });
     return response.data;
+  },
+  
+  resetSettings: async () => {
+    const response = await api.post('/automation/reset-settings');
+    return response.data;
   }
 };
 
