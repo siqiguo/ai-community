@@ -17,7 +17,10 @@ class ClaudeService {
     this.requestQueue = [];
     this.processingRequest = false;
     this.lastRequestTime = 0;
-    this.minRequestInterval = 200; // 200ms between requests
+    this.minRequestInterval = 3000; // 3 seconds between requests
+    this.requestsThisMinute = 0;
+    this.maxRequestsPerMinute = 20; // Max 20 requests per minute
+    this.minuteTimer = setInterval(() => this.resetMinuteCounter(), 60000);
   }
   
   /**
@@ -56,10 +59,25 @@ class ClaudeService {
   }
   
   /**
-   * Process the request queue
+   * Reset the per-minute request counter
+   */
+  resetMinuteCounter() {
+    this.requestsThisMinute = 0;
+    console.log('Claude API rate limit counter reset');
+  }
+  
+  /**
+   * Process the request queue with improved rate limiting
    */
   async processQueue() {
     if (this.processingRequest || this.requestQueue.length === 0) {
+      return;
+    }
+    
+    // Check if we've hit the per-minute rate limit
+    if (this.requestsThisMinute >= this.maxRequestsPerMinute) {
+      console.log('Rate limit reached. Waiting before processing more requests...');
+      setTimeout(() => this.processQueue(), 5000); // Try again in 5 seconds
       return;
     }
     
@@ -76,6 +94,9 @@ class ClaudeService {
     const { prompt, options, resolve, reject } = this.requestQueue.shift();
     
     try {
+      console.log('Sending request to Claude API...');
+      this.requestsThisMinute++;
+      
       const response = await this.client.post('/messages', {
         model: options.model,
         max_tokens: options.max_tokens,
@@ -87,12 +108,18 @@ class ClaudeService {
       });
       
       this.lastRequestTime = Date.now();
+      console.log(`Claude API request successful. Requests this minute: ${this.requestsThisMinute}/${this.maxRequestsPerMinute}`);
       resolve(response.data.content[0].text);
     } catch (error) {
+      console.error('Claude API error:', error.message);
       reject(error);
     } finally {
       this.processingRequest = false;
-      this.processQueue(); // Process next request if any
+      
+      // Add a slight delay before processing the next request
+      setTimeout(() => {
+        this.processQueue(); // Process next request if any
+      }, 500);
     }
   }
   

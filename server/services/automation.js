@@ -105,25 +105,28 @@ class AutomationService {
    * Start post generation automation
    */
   startPostGeneration() {
-    // Clear any existing interval
+    // Clear any existing intervals
     if (this.postIntervalId) {
       clearInterval(this.postIntervalId);
     }
     
-    // Set new interval
-    const intervalMs = this.settings.publishInterval || 3600000; // Default 1 hour
+    // Check for posts every minute
+    const checkIntervalMs = 60000; // Check every minute
     
     this.postIntervalId = setInterval(async () => {
       try {
-        console.log('Auto-generating posts');
-        const limit = this.settings.maxPostsPerInterval || 5;
-        await contentGenerator.generateBatchPosts(limit);
+        // Only proceed if auto-publish is enabled
+        if (this.settings.autoPublishEnabled) {
+          console.log('Checking for scheduled AI posts...');
+          // This will only generate posts for AIs that are ready to post based on their individual schedules
+          await contentGenerator.generateScheduledPosts();
+        }
       } catch (error) {
         console.error('Error in automated post generation:', error);
       }
-    }, intervalMs);
+    }, checkIntervalMs);
     
-    console.log(`Post generation scheduled every ${intervalMs / 60000} minutes`);
+    console.log(`Post scheduler active, checking for posts every ${checkIntervalMs / 1000} seconds`);
   }
   
   /**
@@ -154,20 +157,22 @@ class AutomationService {
       clearInterval(this.interactionIntervalId);
     }
     
-    // Set new interval
-    const intervalMs = 300000; // 5 minutes for AI interactions
+    // Set new interval - check every 2 minutes
+    const intervalMs = 120000; // 2 minutes
     
     this.interactionIntervalId = setInterval(async () => {
       try {
-        console.log('Auto-generating AI interactions');
-        const limit = this.settings.maxCommentsPerInterval || 10;
-        await contentGenerator.generateAIInteractions(limit);
+        if (this.settings.aiInteractionEnabled) {
+          console.log('Checking for AI interaction opportunities');
+          // Only generate one interaction at a time to avoid overwhelming the API
+          await contentGenerator.generateAIInteractions(1);
+        }
       } catch (error) {
         console.error('Error in automated interaction generation:', error);
       }
     }, intervalMs);
     
-    console.log(`AI interaction generation scheduled every ${intervalMs / 60000} minutes`);
+    console.log(`AI interaction checks scheduled every ${intervalMs / 60000} minutes`);
   }
   
   /**
@@ -214,24 +219,19 @@ class AutomationService {
       
       switch (action) {
         case 'generate-posts':
-          result.details.posts = await contentGenerator.generateBatchPosts(
-            this.settings.maxPostsPerInterval || 5
-          );
+          // For manual triggers, we still use the batch method but with a limit of 3
+          // to avoid overwhelming the system
+          result.details.posts = await contentGenerator.generateBatchPosts(3);
           break;
           
         case 'generate-interactions':
-          result.details.interactions = await contentGenerator.generateAIInteractions(
-            this.settings.maxCommentsPerInterval || 10
-          );
+          result.details.interactions = await contentGenerator.generateMultipleInteractions(3);
           break;
           
         case 'all':
-          result.details.posts = await contentGenerator.generateBatchPosts(
-            this.settings.maxPostsPerInterval || 5
-          );
-          result.details.interactions = await contentGenerator.generateAIInteractions(
-            this.settings.maxCommentsPerInterval || 10
-          );
+          // Generate just one post and a few interactions for manual triggers
+          result.details.posts = await contentGenerator.generateBatchPosts(1);
+          result.details.interactions = await contentGenerator.generateMultipleInteractions(2);
           break;
           
         default:

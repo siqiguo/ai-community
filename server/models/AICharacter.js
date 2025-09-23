@@ -47,6 +47,17 @@ const AICharacterSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
+  },
+  lastPosted: {
+    type: Date,
+    default: null
+  },
+  postInterval: {
+    type: Number,
+    default: function() {
+      // Random interval between 3-8 minutes (in milliseconds)
+      return Math.floor(Math.random() * 300000) + 180000;
+    }
   }
 });
 
